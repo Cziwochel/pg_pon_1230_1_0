@@ -5,6 +5,7 @@ import sqlite3
 import random
 import datetime
 
+
 class Aphorism(sqlite3.Connection):
     def cursor(self, *args):
         return super().cursor(AphorismCursor)
@@ -24,7 +25,7 @@ class AphorismCursor(sqlite3.Cursor):
         self.execute('SELECT name FROM sqlite_master WHERE type="table" AND name="used_aphorisms"')
         exist = self.fetchall()
         if not exist:
-            self.execute('CREATE TABLE "used_aphorisms" ("id"INTEGER UNIQUE,PRIMARY KEY("id" AUTOINCREMENT))')
+            self.execute('CREATE TABLE "used_aphorisms" ("id"INTEGER UNIQUE, "grades" INT, PRIMARY KEY("id" AUTOINCREMENT))')
 
         # check if that aphorism wasn't used and if was, chose next available
         start = random_id
@@ -42,14 +43,14 @@ class AphorismCursor(sqlite3.Cursor):
                 break
 
         # mark aphorism as used
-        self.execute(f'INSERT INTO used_aphorisms SELECT id FROM aphorisms WHERE id = {random_id}')
+        self.execute(f'SELECT id FROM aphorisms WHERE id = {random_id}')
         return random_id
 
     def print_aphorism(self, id):
         self.execute(f'SELECT text, author FROM aphorisms WHERE id = {id}')
         aphorism_content = self.fetchone()
-        print(f'{aphorism_content[0]} \n\n{aphorism_content[1]}')
-        
+        print(f'\n{aphorism_content[0]} \n\n{aphorism_content[1]}\n')
+
         # grade aphorism
         mark = input("Jak oceniasz aforyzm w skali od 1 do 5?\n")
         while mark.isdecimal() == False or int(mark) < 0 or int(mark) > 5:
@@ -57,6 +58,7 @@ class AphorismCursor(sqlite3.Cursor):
             mark = input()
         else:
             print("Dziękujemy za ocenę.")
+            self.execute('INSERT INTO used_aphorisms (id, grades) VALUES ({}, {})'.format(id, mark))
 
     def date_check(self):
         self.execute('SELECT name FROM sqlite_master WHERE type="table" AND name="date"')
@@ -70,5 +72,6 @@ class AphorismCursor(sqlite3.Cursor):
         if (current_day.year, current_day.month, current_day.day) == old_date:
             return 0
         else:
-            self.execute(f'UPDATE date SET year = {current_day.year}, month = {current_day.month}, day = {current_day.day}')
+            self.execute(f'UPDATE date SET year = {current_day.year}, month = {current_day.month}, '
+                         f'day = {current_day.day}')
             return 1

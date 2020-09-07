@@ -49,6 +49,14 @@ class AphorismCursor(sqlite3.Cursor):
         self.execute(f'SELECT text, author FROM aphorisms WHERE id = {id}')
         aphorism_content = self.fetchone()
         print(f'{aphorism_content[0]} \n\n{aphorism_content[1]}')
+        
+        # grade aphorism
+        mark = input("Jak oceniasz aforyzm w skali od 1 do 5?\n")
+        while mark.isdecimal() == False or int(mark) < 0 or int(mark) > 5:
+            print("Nie ma takiej oceny. Spróbuj ponownie.")
+            mark = input()
+        else:
+            print("Dziękujemy za ocenę.")
 
     def date_check(self):
         self.execute('SELECT name FROM sqlite_master WHERE type="table" AND name="date"')

@@ -17,8 +17,7 @@ if last_aphorism:
 
 if cursor.date_check():
     random_id = cursor.choose_unique_random()
-
-cursor.print_aphorism(random_id)
+    cursor.print_aphorism(random_id)
 
 database.commit()
 database.close()

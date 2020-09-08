@@ -22,10 +22,10 @@ class AphorismCursor(sqlite3.Cursor):
         random_id = random.randrange(1, number_of_rows)
 
         # if does not exist create used_aphorisms table
-        self.execute('SELECT name FROM sqlite_master WHERE type="table" AND name="used_aphorisms"')
-        exist = self.fetchall()
-        if not exist:
-            self.execute('CREATE TABLE "used_aphorisms" ('
+        # self.execute('SELECT name FROM sqlite_master WHERE type="table" AND name="used_aphorisms"')
+        # exist = self.fetchall()
+        # if not exist:
+        self.execute('CREATE TABLE IF NOT EXISTS"used_aphorisms" ('
                          '"id"	INTEGER UNIQUE,'
                          '"aphorisms_id"	INTEGER UNIQUE,'
                          'PRIMARY KEY("id" AUTOINCREMENT));')
@@ -56,12 +56,19 @@ class AphorismCursor(sqlite3.Cursor):
 
         # grade aphorism
         mark = input("Jak oceniasz aforyzm w skali od 1 do 5?\n")
-        while mark.isdecimal() == False or int(mark) < 0 or int(mark) > 5:
+        while mark.isdecimal() is False or int(mark) < 0 or int(mark) > 5:
             print("Nie ma takiej oceny. Spróbuj ponownie.")
             mark = input()
         else:
             print("Dziękujemy za ocenę.")
             self.execute('UPDATE aphorisms SET grades = {} WHERE id = {} '.format(mark, id))
+
+            #if mark is 5 create table favorites if does not exist and add to favorites
+            if int(mark) == 5:
+                self.execute('CREATE TABLE IF NOT EXISTS "favorites" ('
+                             '"id"	INTEGER UNIQUE,'
+                             'PRIMARY KEY("id" AUTOINCREMENT));')
+                self.execute(f'INSERT INTO favorites SELECT id FROM aphorisms WHERE id = {id}')
 
     def date_check(self):
         self.execute('SELECT name FROM sqlite_master WHERE type="table" AND name="date"')

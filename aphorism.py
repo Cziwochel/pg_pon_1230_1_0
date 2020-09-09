@@ -45,24 +45,40 @@ class AphorismCursor(sqlite3.Cursor):
 
 
         # mark aphorism as used
-        self.execute(f'INSERT INTO used_aphorisms (aphorisms_id) SELECT id FROM aphorisms WHERE id = {random_id}')
+        self.execute(f'INSERT INTO used_aphorisms (aphorisms_id) SELECT aphorisms_id FROM aphorisms WHERE id = {random_id}')
         return random_id
 
-    def print_aphorism(self, id):
-        if id == -1:
-            return
-        self.execute(f'SELECT text, author FROM aphorisms WHERE id = {id}')
+    def print_aphorism(self, id=0, grade=0):
+        self.execute(f'SELECT text, author FROM aphorisms WHERE aphorisms_id = {id} OR grades = {grade}')
         aphorism_content = self.fetchone()
+        print("="*40)
         print(f'\n{aphorism_content[0]} \n\n{aphorism_content[1]}\n')
+        print("=" * 40)
 
-        # grade aphorism
+    def grade_aphorism(self, id):
         mark = input("Jak oceniasz aforyzm w skali od 1 do 5?\n")
-        while mark.isdecimal() == False or int(mark) < 0 or int(mark) > 5:
+        while mark.isdecimal() is False or int(mark) < 0 or int(mark) > 5:
             print("Nie ma takiej oceny. Spróbuj ponownie.")
             mark = input()
         else:
             print("Dziękujemy za ocenę.")
-            self.execute('UPDATE aphorisms SET grades = {} WHERE id = {} '.format(mark, id))
+            self.execute('UPDATE aphorisms SET grades = {} WHERE aphorisms_id = {} '.format(mark, id))
+
+    def favourites(self):
+        mark = input("W celu wyświetlenia aforyzmów z podaną oceną wpisz liczbę od 1 do 5: ")
+        while mark.isdecimal() is False or int(mark) < 0 or int(mark) > 5:
+            print("Nie ma takiej oceny. Spróbuj ponownie.")
+            mark = input()
+        self.execute(f'SELECT text, author FROM aphorisms WHERE grades = {mark}')
+        table = self.fetchall()
+        i = 1
+        if len(table) == 0:
+            print("Nie ma aforyzmów z taką ocena")
+        print("=" * 40)
+        for row in table:
+            print(f'\n{i}.{row[0]} \n\n{row[1]}\n')
+            i += 1
+        print("=" * 40)
 
     def date_check(self):
         self.execute('SELECT name FROM sqlite_master WHERE type="table" AND name="date"')
@@ -79,3 +95,19 @@ class AphorismCursor(sqlite3.Cursor):
             self.execute(f'UPDATE date SET year = {current_day.year}, month = {current_day.month}, '
                              f'day = {current_day.day}')
             return 1
+
+    def interface(self, id):
+        interaction = input('\nJeśli chcesz ocenić aforyzm wpisz - "o"\n'
+                                'Jeśli chcesz wyświetlić aforyzmy z daną oceną wpisz - "w"\n'
+                                'Jeśli chesz zakończyć pracę programu wpisz - "k"\n')
+        while not (interaction == 'k'):
+            while not ((interaction == 'k') or (interaction == 'o') or (interaction == 'w')):
+                interaction = input('Nie ma takiej komendy spróbuj ponownie')
+            if interaction == "o":
+                self.grade_aphorism(id)
+            elif interaction == "w":
+                self.favourites()
+            interaction = input('\nJeśli chcesz ocenić aforyzm wpisz - "o"\n'
+                                    'Jeśli chcesz wyświetlić aforyzmy z daną oceną wpisz - "w"\n'
+                                    'Jeśli chesz zakończyć pracę programu wpisz - "k"\n')
+

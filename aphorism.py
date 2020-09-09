@@ -22,34 +22,35 @@ class AphorismCursor(sqlite3.Cursor):
         random_id = random.randrange(1, number_of_rows)
 
         # if does not exist create used_aphorisms table
-        self.execute('SELECT name FROM sqlite_master WHERE type="table" AND name="used_aphorisms"')
-        exist = self.fetchall()
-        if not exist:
-            self.execute('CREATE TABLE "used_aphorisms" ('
+        self.execute('CREATE TABLE IF NOT EXISTS"used_aphorisms" ('
                          '"id"	INTEGER UNIQUE,'
                          '"aphorisms_id"	INTEGER UNIQUE,'
                          'PRIMARY KEY("id" AUTOINCREMENT));')
 
         # check if that aphorism wasn't used and if was, chose next available
         start = random_id
-        self.execute('SELECT id FROM used_aphorisms')
+        self.execute('SELECT aphorisms_id FROM used_aphorisms')
         used = self.fetchall()
         while True:
-            if random_id == number_of_rows:
-                random_id = 1
             if (random_id,) in used:
+                if random_id == number_of_rows:
+                    random_id = 1
+                    continue
                 random_id += 1
+                if start == random_id:
+                    print("Baza aforyzmów zostałą wyczerpana.")
+                    return -1
             else:
                 break
-            if start == random_id:
-                print("Baza aforyzmów zostałą wyczerpana.")
-                break
+
 
         # mark aphorism as used
         self.execute(f'INSERT INTO used_aphorisms (aphorisms_id) SELECT id FROM aphorisms WHERE id = {random_id}')
         return random_id
 
     def print_aphorism(self, id):
+        if id == -1:
+            return
         self.execute(f'SELECT text, author FROM aphorisms WHERE id = {id}')
         aphorism_content = self.fetchone()
         print(f'\n{aphorism_content[0]} \n\n{aphorism_content[1]}\n')

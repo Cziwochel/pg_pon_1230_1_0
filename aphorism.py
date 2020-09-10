@@ -38,14 +38,14 @@ class AphorismCursor(sqlite3.Cursor):
                     continue
                 random_id += 1
                 if start == random_id:
-                    print("Baza aforyzmów zostałą wyczerpana.")
+                    print("Baza aforyzmów została wyczerpana.")
                     return -1
             else:
                 break
 
 
         # mark aphorism as used
-        self.execute(f'INSERT INTO used_aphorisms (aphorisms_id) SELECT aphorisms_id FROM aphorisms WHERE id = {random_id}')
+        self.execute(f'INSERT INTO used_aphorisms (aphorisms_id) SELECT aphorisms_id FROM aphorisms WHERE aphorisms_id = {random_id}')
         return random_id
 
     def print_aphorism(self, id=0, grade=0):
@@ -73,7 +73,7 @@ class AphorismCursor(sqlite3.Cursor):
         table = self.fetchall()
         i = 1
         if len(table) == 0:
-            print("Nie ma aforyzmów z taką ocena")
+            print("Nie ma aforyzmów z taką oceną.")
         print("=" * 40)
         for row in table:
             print(f'\n{i}.{row[0]} \n\n{row[1]}\n')

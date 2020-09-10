@@ -26,7 +26,7 @@ class AphorismCursor(sqlite3.Cursor):
                          '"id"	INTEGER UNIQUE,'
                          '"aphorisms_id"	INTEGER UNIQUE,'
                          'PRIMARY KEY("id" AUTOINCREMENT));')
-
+ 
         # check if that aphorism wasn't used and if was, chose next available
         start = random_id
         self.execute('SELECT aphorisms_id FROM used_aphorisms')

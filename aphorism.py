@@ -98,7 +98,7 @@ class AphorismCursor(sqlite3.Cursor):
 
     def interface(self, id):
         interaction = input('\nJeśli chcesz ocenić aforyzm wpisz - "o"\n'
-                                'Jeśli chcesz wyświtlić aforyzmy z daną oceną wpisz - "w"\n'
+                                'Jeśli chcesz wyświetlić aforyzmy z daną oceną wpisz - "w"\n'
                                 'Jeśli chesz zakończyć pracę programu wpisz - "k"\n')
         while not (interaction == 'k'):
             while not ((interaction == 'k') or (interaction == 'o') or (interaction == 'w')):
